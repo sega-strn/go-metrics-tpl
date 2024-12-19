@@ -53,14 +53,14 @@ func (c *CounterMetric) Add(value int64) {
 	c.value += value
 }
 
-// MemStorage represents in-memory storage for metrics
+// MemStorage представляет собой потокобезопасное хранилище метрик в памяти
 type MemStorage struct {
 	mu       sync.RWMutex
 	gauges   map[string]*GaugeMetric
 	counters map[string]*CounterMetric
 }
 
-// NewMemStorage creates a new instance of MemStorage
+// NewMemStorage создает новое хранилище метрик в памяти
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
 		gauges:   make(map[string]*GaugeMetric),
@@ -68,7 +68,7 @@ func NewMemStorage() *MemStorage {
 	}
 }
 
-// UpdateGauge updates or sets a gauge metric
+// UpdateGauge обновляет или устанавливает метрику типа gauge
 func (ms *MemStorage) UpdateGauge(name string, value float64) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -79,7 +79,7 @@ func (ms *MemStorage) UpdateGauge(name string, value float64) {
 	ms.gauges[name].Set(value)
 }
 
-// UpdateCounter updates or increments a counter metric
+// UpdateCounter обновляет или увеличивает метрику типа counter
 func (ms *MemStorage) UpdateCounter(name string, value int64) {
 	ms.mu.Lock()
 	defer ms.mu.Unlock()
@@ -90,7 +90,7 @@ func (ms *MemStorage) UpdateCounter(name string, value int64) {
 	ms.counters[name].Add(value)
 }
 
-// GetGauge retrieves a gauge metric
+// GetGauge возвращает метрику типа gauge
 func (ms *MemStorage) GetGauge(name string) (float64, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
@@ -102,7 +102,7 @@ func (ms *MemStorage) GetGauge(name string) (float64, error) {
 	return metric.value, nil
 }
 
-// GetCounter retrieves a counter metric
+// GetCounter возвращает метрику типа counter
 func (ms *MemStorage) GetCounter(name string) (int64, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
