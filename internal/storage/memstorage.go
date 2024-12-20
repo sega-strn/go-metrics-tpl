@@ -113,3 +113,37 @@ func (ms *MemStorage) GetCounter(name string) (int64, error) {
 	}
 	return metric.value, nil
 }
+
+// RLock provides a read lock for thread-safe access to metrics
+func (ms *MemStorage) RLock() {
+	ms.mu.RLock()
+}
+
+// RUnlock releases the read lock
+func (ms *MemStorage) RUnlock() {
+	ms.mu.RUnlock()
+}
+
+// GetAllGauges returns a map of all gauge metrics
+func (s *MemStorage) GetAllGauges() map[string]float64 {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	gauges := make(map[string]float64)
+	for name, metric := range s.gauges {
+		gauges[name] = metric.value
+	}
+	return gauges
+}
+
+// GetAllCounters returns a map of all counter metrics
+func (s *MemStorage) GetAllCounters() map[string]int64 {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+
+	counters := make(map[string]int64)
+	for name, metric := range s.counters {
+		counters[name] = metric.value
+	}
+	return counters
+}
