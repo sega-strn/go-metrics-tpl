@@ -2,6 +2,7 @@ package storage
 
 import (
 	"fmt"
+	"strconv"
 	"sync"
 )
 
@@ -95,11 +96,18 @@ func (ms *MemStorage) GetGauge(name string) (float64, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
-	metric, exists := ms.gauges[name]
-	if !exists {
+	metric, ok := ms.gauges[name]
+	if !ok {
 		return 0, fmt.Errorf("gauge metric %s not found", name)
 	}
-	return metric.value, nil
+
+	// Форматируем число с точностью до 3 знаков после запятой
+	formattedValue, _ := strconv.ParseFloat(
+		strconv.FormatFloat(metric.value, 'f', 3, 64),
+		64,
+	)
+
+	return formattedValue, nil
 }
 
 // GetCounter возвращает метрику типа counter
