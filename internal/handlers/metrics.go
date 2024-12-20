@@ -72,7 +72,7 @@ func (h *MetricsHandler) HandleGetMetric(w http.ResponseWriter, r *http.Request)
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.Write([]byte(fmt.Sprintf("%f", value)))
+		w.Write([]byte(fmt.Sprintf("%.3f", value)))
 
 	case "counter":
 		value, err := h.storage.GetCounter(metricName)
@@ -89,26 +89,26 @@ func (h *MetricsHandler) HandleGetMetric(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *MetricsHandler) HandleListMetrics(w http.ResponseWriter, r *http.Request) {
-    // Get all metrics from storage
-    gauges := h.storage.GetAllGauges()
-    counters := h.storage.GetAllCounters()
+	// Get all metrics from storage
+	gauges := h.storage.GetAllGauges()
+	counters := h.storage.GetAllCounters()
 
-    // Create a response string
-    var response strings.Builder
-    response.WriteString("Metrics:\n\n")
+	// Create a response string
+	var response strings.Builder
+	response.WriteString("Metrics:\n\n")
 
-    response.WriteString("Gauges:\n")
-    for name, value := range gauges {
-        response.WriteString(fmt.Sprintf("%s: %f\n", name, value))
-    }
+	response.WriteString("Gauges:\n")
+	for name, value := range gauges {
+		response.WriteString(fmt.Sprintf("%s: %.3f\n", name, value))
+	}
 
-    response.WriteString("\nCounters:\n")
-    for name, value := range counters {
-        response.WriteString(fmt.Sprintf("%s: %d\n", name, value))
-    }
+	response.WriteString("\nCounters:\n")
+	for name, value := range counters {
+		response.WriteString(fmt.Sprintf("%s: %d\n", name, value))
+	}
 
-    // Set content type and write response
-    w.Header().Set("Content-Type", "text/plain")
-    w.WriteHeader(http.StatusOK)
-    w.Write([]byte(response.String()))
+	// Set content type and write response
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(response.String()))
 }
