@@ -72,7 +72,7 @@ func (h *MetricsHandler) HandleGetMetric(w http.ResponseWriter, r *http.Request)
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.Write([]byte(fmt.Sprintf("%.3f", value)))
+		w.Write([]byte(fmt.Sprintf("%.2f", value)))
 
 	case "counter":
 		value, err := h.storage.GetCounter(metricName)
