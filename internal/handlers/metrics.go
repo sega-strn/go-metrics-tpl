@@ -72,7 +72,9 @@ func (h *MetricsHandler) HandleGetMetric(w http.ResponseWriter, r *http.Request)
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
-		w.Write([]byte(fmt.Sprintf("%.2f", value)))
+		// Форматируем с 3 знаками после запятой и усекаем лишние цифры
+		formattedValue := strings.TrimRight(fmt.Sprintf("%.3f", value), "0")
+		w.Write([]byte(formattedValue))
 
 	case "counter":
 		value, err := h.storage.GetCounter(metricName)
