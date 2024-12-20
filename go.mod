@@ -3,6 +3,7 @@ module github.com/sega-strn/go-metrics-tpl
 go 1.22
 
 require (
+	github.com/gorilla/mux v1.8.1
 	github.com/stretchr/testify v1.10.0
 // Здесь могут быть дополнительные зависимости в будущем
 )

@@ -95,10 +95,11 @@ func (ms *MemStorage) GetGauge(name string) (float64, error) {
 	ms.mu.RLock()
 	defer ms.mu.RUnlock()
 
-	metric, exists := ms.gauges[name]
-	if !exists {
+	metric, ok := ms.gauges[name]
+	if !ok {
 		return 0, fmt.Errorf("gauge metric %s not found", name)
 	}
+
 	return metric.value, nil
 }
 
@@ -112,4 +113,38 @@ func (ms *MemStorage) GetCounter(name string) (int64, error) {
 		return 0, fmt.Errorf("counter metric %s not found", name)
 	}
 	return metric.value, nil
+}
+
+// RLock provides a read lock for thread-safe access to metrics
+func (ms *MemStorage) RLock() {
+	ms.mu.RLock()
+}
+
+// RUnlock releases the read lock
+func (ms *MemStorage) RUnlock() {
+	ms.mu.RUnlock()
+}
+
+// GetAllGauges returns a map of all gauge metrics
+func (ms *MemStorage) GetAllGauges() map[string]float64 {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	gauges := make(map[string]float64)
+	for name, metric := range ms.gauges {
+		gauges[name] = metric.value
+	}
+	return gauges
+}
+
+// GetAllCounters returns a map of all counter metrics
+func (ms *MemStorage) GetAllCounters() map[string]int64 {
+	ms.mu.RLock()
+	defer ms.mu.RUnlock()
+
+	counters := make(map[string]int64)
+	for name, metric := range ms.counters {
+		counters[name] = metric.value
+	}
+	return counters
 }

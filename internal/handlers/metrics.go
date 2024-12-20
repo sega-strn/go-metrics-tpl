@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -51,4 +52,65 @@ func (h *MetricsHandler) HandleUpdateMetric(w http.ResponseWriter, r *http.Reque
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (h *MetricsHandler) HandleGetMetric(w http.ResponseWriter, r *http.Request) {
+	// Разбираем путь запроса
+	parts := strings.Split(r.URL.Path, "/")
+	if len(parts) < 4 {
+		http.Error(w, "Invalid request", http.StatusNotFound)
+		return
+	}
+
+	metricType := parts[2]
+	metricName := parts[3]
+
+	switch metricType {
+	case "gauge":
+		value, err := h.storage.GetGauge(metricName)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		// Форматируем с 3 знаками после запятой и усекаем лишние цифры
+		formattedValue := strings.TrimRight(fmt.Sprintf("%.3f", value), "0")
+		w.Write([]byte(formattedValue))
+
+	case "counter":
+		value, err := h.storage.GetCounter(metricName)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		w.Write([]byte(fmt.Sprintf("%d", value)))
+
+	default:
+		http.Error(w, "Invalid metric type", http.StatusBadRequest)
+		return
+	}
+}
+
+func (h *MetricsHandler) HandleListMetrics(w http.ResponseWriter, r *http.Request) {
+	// Get all metrics from storage
+	gauges := h.storage.GetAllGauges()
+	counters := h.storage.GetAllCounters()
+
+	// Create a response string
+	var response strings.Builder
+	response.WriteString("Metrics:\n\n")
+
+	response.WriteString("Gauges:\n")
+	for name, value := range gauges {
+		response.WriteString(fmt.Sprintf("%s: %.3f\n", name, value))
+	}
+
+	response.WriteString("\nCounters:\n")
+	for name, value := range counters {
+		response.WriteString(fmt.Sprintf("%s: %d\n", name, value))
+	}
+
+	// Set content type and write response
+	w.Header().Set("Content-Type", "text/plain")
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(response.String()))
 }
